@@ -32,6 +32,7 @@ dependencies = [
     "huaweicloudsdkiam>=3.1.140",
     "huaweicloudsdkecs>=3.1.140",
     "huaweicloudsdkvpc>=3.1.140",
+    "tencentcloud-sdk-python-vpc>=3.0.1300",
 ]
 
 [project.urls]

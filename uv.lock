@@ -640,6 +640,7 @@ dependencies = [
     { name = "requests" },
     { name = "tencentcloud-sdk-python-cvm" },
     { name = "tencentcloud-sdk-python-lighthouse" },
+    { name = "tencentcloud-sdk-python-vpc" },
 ]
 
 [package.dev-dependencies]
@@ -665,6 +666,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32" },
     { name = "tencentcloud-sdk-python-cvm", specifier = ">=3.0.1300" },
     { name = "tencentcloud-sdk-python-lighthouse", specifier = ">=3.0.1300" },
+    { name = "tencentcloud-sdk-python-vpc", specifier = ">=3.0.1300" },
 ]
 
 [package.metadata.requires-dev]
@@ -1982,6 +1984,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f1/e0/d66ff1d4aa368938d8fc50aaf78c3c8bc4d8355f3ab72b25a42bf40facf2/tencentcloud_sdk_python_lighthouse-3.1.201.tar.gz", hash = "sha256:6b4144ecc6b9350ad96e2044a297ad854a0e33091007c1c166b8a2038475d6f6", size = 107743, upload-time = "2026-11-03T20:15:31.571Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/ee/0bc59654e68fff981bd0ff45e26270c727d0c002242161c8ca97784de4ac/tencentcloud_sdk_python_lighthouse-3.1.201-py2.py3-none-any.whl", hash = "sha256:79bfc5cc7e906771d28dd5cfa2c04ed48073ea441a3d3a50c48910dda9881f09", size = 110080, upload-time = "2026-11-03T20:15:28.941Z" },
+]
+
+[[package]]
+name = "tencentcloud-sdk-python-vpc"
+version = "3.1.206"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tencentcloud-sdk-python-common" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f7/24/9e35ab26c0ad6f07ba6289b88de8f1c77f1bfbab3c0e23c686d22fef9604/tencentcloud_sdk_python_vpc-3.1.206.tar.gz", hash = "sha256:d8702d814851336571c82a194d22ab914288611b0771466db79922d15df6ef19", size = 355498, upload-time = "2026-11-11T06:04:23.329Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/24/8f/d73e5671da7b8b61455550b41fd285043b480bf1bf921165b6ab18f6b879/tencentcloud_sdk_python_vpc-3.1.206-py2.py3-none-any.whl", hash = "sha256:a4dd58d719fb763bedc3ffa26b83df126e28d21eb039b50817bd7894ed3ad222", size = 359173, upload-time = "2026-11-11T06:04:20.436Z" },
 ]
 
 [[package]]
