@@ -28,6 +28,11 @@ _ALLOWED_HOSTS = frozenset(urlparse(u).hostname for u in _ENDPOINTS)
 _TIMEOUT = 6.0
 _CACHE_TTL = 60.0
 
+# 探测结果缓存（get_public_ip 内通过 global 读写，必须先在此初始化，
+# 否则首次调用会因未绑定局部/全局变量而抛 NameError）
+_cached_ip: str = ""
+_cached_at: float = 0.0
+
 
 def _assert_endpoint_safe(url: str) -> str:
     """校验探测端点：HTTPS、域名白名单、解析结果不为内网地址。"""
