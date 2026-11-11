@@ -18,6 +18,11 @@ a = Analysis(
         "cloudaccess.providers.aliyun",
         "cloudaccess.providers.tencent",
         "cloudaccess.providers.huawei",
+        # six.moves 为动态模块，PyInstaller 静态分析不可见（华为 SDK 内部使用）
+        "six",
+        "six.moves",
+        "six.moves.urllib",
+        "six.moves.urllib.parse",
     ],
     excludes=["tkinter", "pytest"],
     noarchive=False,
