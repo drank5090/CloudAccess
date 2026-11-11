@@ -18,7 +18,12 @@ def extract(changelog: str, tag: str) -> str:
     start = match.end()
     nxt = re.search(r"^## ", changelog[start:], re.M)
     section = changelog[start : start + nxt.start()] if nxt else changelog[start:]
-    return section.strip()
+    lines = [
+        line
+        for line in section.strip().splitlines()
+        if not re.match(r"^\[[^\]]+\]:\s*\S+", line)  # 去掉文末链接引用定义
+    ]
+    return "\n".join(lines).strip()
 
 
 def main() -> int:
