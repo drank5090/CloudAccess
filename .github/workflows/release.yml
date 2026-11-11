@@ -1,0 +1,104 @@
+name: Release
+
+# 仅当新 tag 推送时触发：先跑快速测试，再打包，最后发布到 GitHub Release
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: 测试 (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 安装依赖
+        run: uv sync --frozen
+
+      - name: 代码检查
+        run: uv run ruff check src/ tests/
+
+      - name: 单元测试
+        run: uv run pytest -q
+
+  build:
+    name: 打包 (${{ matrix.os }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 安装依赖
+        run: uv sync --frozen
+
+      - name: PyInstaller 打包
+        run: uv run pyinstaller packaging.spec
+
+      - name: 归档 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/cloudaccess.exe -DestinationPath dist/CloudAccess-${{ runner.os }}-x64.zip
+
+      - name: 归档 (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cd dist
+          zip CloudAccess-Linux-x64.zip cloudaccess
+          sha256sum CloudAccess-Linux-x64.zip > CloudAccess-Linux-x64.zip.sha256
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ runner.os }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+
+  release:
+    name: 发布 Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 提取更新日志
+        run: python scripts/extract_changelog.py "${GITHUB_REF_NAME}" > release-notes.md
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          files: |
+            artifacts/*.zip
+            artifacts/*.sha256
+          fail_on_unmatched_files: true
