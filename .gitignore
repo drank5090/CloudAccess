@@ -36,3 +36,4 @@ release-out/
 .env
 *.secret
 secrets/
+.zcode/
