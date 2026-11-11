@@ -9,10 +9,11 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import uuid
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import keyring
@@ -37,14 +38,12 @@ class SecretStore:
         return keyring.get_password(SERVICE_NAME, key)
 
     def delete_secret(self, key: str) -> None:
-        try:
+        with contextlib.suppress(keyring.errors.PasswordDeleteError):
             keyring.delete_password(SERVICE_NAME, key)
-        except keyring.errors.PasswordDeleteError:
-            pass
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 class AccountStore:

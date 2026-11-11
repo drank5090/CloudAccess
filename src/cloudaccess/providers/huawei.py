@@ -14,6 +14,7 @@ from typing import Any
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkcore.exceptions.exceptions import SdkException
 from huaweicloudsdkecs.v2 import ListServersDetailsRequest
+from huaweicloudsdkecs.v2.ecs_client import EcsClient
 from huaweicloudsdkiam.v3 import model as iam_models
 from huaweicloudsdkiam.v3.iam_client import IamClient
 from huaweicloudsdkvpc.v2 import model as vpc_models

@@ -13,9 +13,12 @@ from typing import Any
 
 from tencentcloud.common import credential
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
-from tencentcloud.cvm.v20170312 import cvm_client, models as cvm_models
-from tencentcloud.lighthouse.v20200324 import lighthouse_client, models as lh_models
-from tencentcloud.vpc.v20170312 import vpc_client, models as vpc_models
+from tencentcloud.cvm.v20170312 import cvm_client
+from tencentcloud.cvm.v20170312 import models as cvm_models
+from tencentcloud.lighthouse.v20200324 import lighthouse_client
+from tencentcloud.lighthouse.v20200324 import models as lh_models
+from tencentcloud.vpc.v20170312 import models as vpc_models
+from tencentcloud.vpc.v20170312 import vpc_client
 
 from ..errors import CredentialsInvalidError, FirewallOpError, ProviderError
 from ..models import CloudVendor, FirewallRuleInfo, ServerInfo, ServerKind

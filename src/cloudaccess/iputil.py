@@ -63,9 +63,10 @@ def _is_public_ipv4(ip: str) -> bool:
     if any(n < 0 or n > 255 for n in nums):
         return False
     first = nums[0]
-    if first in (10, 127) or (first == 172 and 16 <= nums[1] <= 31) or (first == 192 and nums[1] == 168):
-        return False  # 私有地址，探测端点不应返回，防御性排除
-    return True
+    is_private = (
+        first in (10, 127) or (first == 172 and 16 <= nums[1] <= 31) or (first == 192 and nums[1] == 168)
+    )
+    return not is_private  # 私有地址，探测端点不应返回，防御性排除
 
 
 def get_public_ip(force: bool = False) -> str:

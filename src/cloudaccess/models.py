@@ -6,7 +6,7 @@ import enum
 from dataclasses import dataclass, field
 
 
-class CloudVendor(str, enum.Enum):
+class CloudVendor(enum.StrEnum):
     """支持的云厂商。"""
 
     ALIYUN = "aliyun"
@@ -35,14 +35,14 @@ VENDOR_META: dict[CloudVendor, VendorMeta] = {
 }
 
 
-class ServerKind(str, enum.Enum):
+class ServerKind(enum.StrEnum):
     """服务器产品类型。"""
 
     ECS = "ecs"  # 云服务器
     LIGHTHOUSE = "lighthouse"  # 轻量应用服务器
 
 
-class AuthStatus(str, enum.Enum):
+class AuthStatus(enum.StrEnum):
     """针对“当前 IP”的授权状态。"""
 
     AUTHORIZED = "authorized"  # 检测到正确的防火墙记录

@@ -11,10 +11,10 @@ from __future__ import annotations
 import concurrent.futures as cf
 from typing import Any
 
-from alibabacloud_ecs20140526.client import Client as EcsClient
 from alibabacloud_ecs20140526 import models as ecs_models
-from alibabacloud_swas_open20200601.client import Client as SwasClient
+from alibabacloud_ecs20140526.client import Client as EcsClient
 from alibabacloud_swas_open20200601 import models as swas_models
+from alibabacloud_swas_open20200601.client import Client as SwasClient
 from alibabacloud_tea_openapi import models as open_api_models
 from Tea.exceptions import TeaException
 
