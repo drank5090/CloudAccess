@@ -156,16 +156,21 @@ class AliyunProvider(CloudProvider):
         return servers
 
     def _ecs_to_server(self, region: str, inst: Any) -> ServerInfo:
-        public_ips = [ip for ip in (inst.public_ip_address or []) if ip]
+        # SDK 中 repeated 字段是一层包装对象：public_ip_address.ip_address /
+        # security_group_ids.security_group_id 才是列表；eip_address.ip_address 是单值字符串
+        ip_wrap = inst.public_ip_address
+        public_ips = [ip for ip in ((ip_wrap.ip_address if ip_wrap else None) or []) if ip]
         if not public_ips and inst.eip_address and inst.eip_address.ip_address:
             public_ips = [inst.eip_address.ip_address]
+        sg_wrap = inst.security_group_ids
+        sg_ids = [sg for sg in ((sg_wrap.security_group_id if sg_wrap else None) or []) if sg]
         return ServerInfo(
             instance_id=inst.instance_id,
             name=inst.instance_name or inst.instance_id,
             region=region,
             public_ip=public_ips[0] if public_ips else "",
             kind=ServerKind.ECS,
-            extra={"security_group_ids": ",".join(inst.security_group_ids or [])},
+            extra={"security_group_ids": ",".join(sg_ids)},
         )
 
     def _swas_to_server(self, region: str, inst: Any) -> ServerInfo:
@@ -180,23 +185,30 @@ class AliyunProvider(CloudProvider):
     # ---------- 防火墙规则 ----------
 
     def _ecs_rules(self, region: str, sg_id: str) -> list[FirewallRuleInfo]:
-        req = ecs_models.DescribeSecurityGroupAttributeRequest(
-            region_id=region, security_group_id=sg_id, direction="ingress", page_size=_PAGE_SIZE
-        )
-        resp = self._ecs_client(region).describe_security_group_attribute(req)
         rules: list[FirewallRuleInfo] = []
-        for p in resp.body.permissions.permission or []:
-            desc = p.description or ""
-            rules.append(
-                FirewallRuleInfo(
-                    rule_id=sg_id,
-                    protocol=str(p.ip_protocol or ""),
-                    port=str(p.port_range or ""),
-                    source_cidr=str(p.source_cidr_ip or ""),
-                    description=desc,
-                    is_created_by_app=desc.startswith("CA|"),
-                )
+        next_token: str | None = None
+        while True:
+            req = ecs_models.DescribeSecurityGroupAttributeRequest(
+                region_id=region, security_group_id=sg_id, direction="ingress", max_results=_PAGE_SIZE
             )
+            if next_token:
+                req.next_token = next_token
+            resp = self._ecs_client(region).describe_security_group_attribute(req)
+            for p in resp.body.permissions.permission or []:
+                desc = p.description or ""
+                rules.append(
+                    FirewallRuleInfo(
+                        rule_id=sg_id,
+                        protocol=str(p.ip_protocol or ""),
+                        port=str(p.port_range or ""),
+                        source_cidr=str(p.source_cidr_ip or ""),
+                        description=desc,
+                        is_created_by_app=desc.startswith("CA|"),
+                    )
+                )
+            next_token = getattr(resp.body, "next_token", None)
+            if not next_token:
+                break
         return rules
 
     def _swas_rules(self, region: str, instance_id: str) -> list[FirewallRuleInfo]:

@@ -7,6 +7,8 @@ has no len()"，导致添加阿里云账号时凭据验证失败。
 
 from __future__ import annotations
 
+from alibabacloud_ecs20140526 import models as ecs_models
+
 from cloudaccess.providers.aliyun import AliyunProvider, _region_ids
 
 
@@ -58,3 +60,44 @@ def test_validate_credentials_and_list_regions(monkeypatch):
 
     assert provider.validate_credentials() == "阿里云 · 2 个可用区域"
     assert provider._list_regions() == ["cn-hangzhou", "ap-southeast-1"]
+
+
+# ---------- _ecs_to_server：repeated 字段包装解包（回归：public_ip_address 不可迭代） ----------
+
+
+def _ecs_instance(public_ips: list[str] | None, sg_ids: list[str] | None, eip: str | None):
+    """用真实 SDK 模型类构造 DescribeInstances 列表项。"""
+    return ecs_models.DescribeInstancesResponseBodyInstancesInstance(
+        instance_id="i-bp1demo",
+        instance_name="demo-web",
+        public_ip_address=ecs_models.DescribeInstancesResponseBodyInstancesInstancePublicIpAddress(
+            ip_address=public_ips
+        ),
+        security_group_ids=ecs_models.DescribeInstancesResponseBodyInstancesInstanceSecurityGroupIds(
+            security_group_id=sg_ids
+        ),
+        eip_address=ecs_models.DescribeInstancesResponseBodyInstancesInstanceEipAddress(
+            ip_address=eip
+        ),
+    )
+
+
+def test_ecs_to_server_unwraps_public_ip_and_security_groups():
+    provider = AliyunProvider("demo-ak-0001", "demo-sk-0001")
+    server = provider._ecs_to_server("cn-hangzhou", _ecs_instance(["1.2.3.4"], ["sg-a", "sg-b"], None))
+    assert server.public_ip == "1.2.3.4"
+    assert server.extra["security_group_ids"] == "sg-a,sg-b"
+
+
+def test_ecs_to_server_falls_back_to_eip():
+    provider = AliyunProvider("demo-ak-0001", "demo-sk-0001")
+    server = provider._ecs_to_server("cn-hangzhou", _ecs_instance(None, ["sg-a"], "5.6.7.8"))
+    assert server.public_ip == "5.6.7.8"
+
+
+def test_ecs_to_server_handles_all_empty():
+    provider = AliyunProvider("demo-ak-0001", "demo-sk-0001")
+    server = provider._ecs_to_server("cn-hangzhou", _ecs_instance(None, None, None))
+    assert server.public_ip == ""
+    assert server.extra["security_group_ids"] == ""
+    assert server.name == "demo-web"

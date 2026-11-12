@@ -1,6 +1,6 @@
 [project]
 name = "cloudaccess"
-version = "0.1.1"
+version = "0.1.2"
 description = "CloudAccess - 一键管理多云厂商服务器防火墙放通 / One-click firewall access for multi-cloud servers"
 readme = "README.md"
 license = { file = "LICENSE" }
