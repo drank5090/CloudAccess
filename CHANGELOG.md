@@ -5,7 +5,12 @@
 
 ## [未发布]
 
+## [0.1.1] - 2026-11-12
+
 ### 修复
+- 添加阿里云账号报错「object of type 'DescribeRegionsResponseBodyRegions' has no len()」：
+  DescribeRegions 响应中 regions 为包装对象，需解包 `body.regions.region` 后使用
+  （影响凭据在线验证与服务器列表的区域枚举两条路径）
 - Release 说明自动提取时过滤 CHANGELOG 文末的链接引用定义行
 
 ## [0.1.0] - 2026-11-12
@@ -19,5 +24,6 @@
 - 无边框浅色现代界面：侧栏搜索/添加账号、服务器表格、状态芯片、批量操作进度
 - `--demo` 演示模式与 `--screenshot` 截图模式（离线，无凭据）
 
-[未发布]: https://github.com/drank5090/CloudAccess/compare/v0.1.0...HEAD
+[未发布]: https://github.com/drank5090/CloudAccess/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/drank5090/CloudAccess/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/drank5090/CloudAccess/releases/tag/v0.1.0

@@ -38,6 +38,20 @@ def _tea_message(exc: TeaException) -> str:
     return str(exc.message or exc)
 
 
+def _region_ids(body: Any) -> list[str]:
+    """从 DescribeRegions 响应体安全取出区域 ID 列表。
+
+    SDK 结构：``body.regions`` 是包装对象（DescribeRegionsResponseBodyRegions），
+    真正的列表在 ``body.regions.region``；直接对 ``body.regions`` 做 len()/迭代
+    会抛 ``TypeError: object of type ... has no len()``。
+    """
+    regions = getattr(body, "regions", None)
+    if regions is None:
+        return []
+    items = getattr(regions, "region", None) or []
+    return [str(r.region_id) for r in items if getattr(r, "region_id", None)]
+
+
 class AliyunProvider(CloudProvider):
     """阿里云（ECS + 轻量应用服务器）。"""
 
@@ -74,12 +88,12 @@ class AliyunProvider(CloudProvider):
         try:
             req = ecs_models.DescribeRegionsRequest()
             resp = self._ecs_client(_REGION_BOOTSTRAP).describe_regions(req)
-            regions = resp.body.regions or []
+            count = len(_region_ids(resp.body))
         except TeaException as exc:
             if self._is_invalid_credentials(exc):
                 raise CredentialsInvalidError("阿里云", f"凭据无效：{_tea_message(exc)}") from exc
             raise ProviderError("阿里云", f"区域列表获取失败：{_tea_message(exc)}") from exc
-        return f"阿里云 · {len(regions)} 个可用区域"
+        return f"阿里云 · {count} 个可用区域"
 
     # ---------- 服务器列表 ----------
 
@@ -96,7 +110,7 @@ class AliyunProvider(CloudProvider):
         try:
             req = ecs_models.DescribeRegionsRequest()
             resp = self._ecs_client(_REGION_BOOTSTRAP).describe_regions(req)
-            return [r.region_id for r in (resp.body.regions or [])]
+            return _region_ids(resp.body)
         except TeaException as exc:
             if self._is_invalid_credentials(exc):
                 raise CredentialsInvalidError("阿里云", f"凭据无效：{_tea_message(exc)}") from exc
